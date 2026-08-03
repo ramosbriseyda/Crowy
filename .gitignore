@@ -1,0 +1,26 @@
+# Secrets / env
+.env
+**/.env
+*.pem
+
+# Python
+backend/venv/
+backend/.venv/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Logs / local / tooling downloads
+*.log
+.cursor/
+.tools/
+

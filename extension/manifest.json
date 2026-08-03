@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Verificador de Noticias",
+  "version": "1.2",
+  "description": "Analiza noticias en la página actual utilizando IA para evaluar su veracidad y nivel de amarillismo.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:8000/*",
+    "http://localhost:8000/*",
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Verificar noticia"
+  },
+  "side_panel": {
+    "default_path": "popup.html"
+  }
+}
