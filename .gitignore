@@ -3,7 +3,9 @@
 **/.env
 *.pem
 
-# Python
+# Python (el .venv pesa ~200MB; nunca debe ir al repo)
+venv/
+.venv/
 backend/venv/
 backend/.venv/
 **/__pycache__/

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Verificador de Noticias",
+  "name": "Crowy",
   "version": "1.2",
-  "description": "Analiza noticias en la página actual utilizando IA para evaluar su veracidad y nivel de amarillismo.",
+  "description": "Analiza noticias en la página actual con IA: veracidad, amarillismo y fuentes.",
   "permissions": [
     "activeTab",
     "scripting",
