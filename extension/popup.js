@@ -108,9 +108,7 @@ const resKeypoints = document.getElementById("res-keypoints");
 const tituloFuentes = document.getElementById("titulo-fuentes");
 const resFuentes = document.getElementById("res-fuentes");
 
-// After deploying on Render, replace with:
-// "https://YOUR-SERVICE.onrender.com/verificar"
-const BACKEND_URL = "http://127.0.0.1:8001/verificar";
+const BACKEND_URL = "https://crowy.onrender.com/verificar";
 let idAnalisisActivo = 0;
 
 const VEREDICTO_LABEL = {
@@ -402,7 +400,7 @@ btn.addEventListener("click", async () => {
     const message = error?.message || String(error);
     if (/Failed to fetch|NetworkError|fetch/i.test(message)) {
       showError(
-        "Could not connect to the backend. Make sure it is running at http://127.0.0.1:8001"
+        "Could not connect to the backend. Make sure https://crowy.onrender.com is online."
       );
     } else if (/Cannot access|Cannot find|Receiving end does not exist/i.test(message)) {
       showError(
