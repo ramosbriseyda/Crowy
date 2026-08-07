@@ -26,7 +26,7 @@ function extraerEnlaces(contenedor) {
       });
       if (enlaces.length >= 30) break;
     } catch (_) {
-      /* Ignorar enlaces inválidos. */
+      /* Ignore invalid links. */
     }
   }
   return enlaces;
@@ -46,8 +46,8 @@ function obtenerTitulo() {
 }
 
 /**
- * Extrae metadatos y texto principal con Mozilla Readability.
- * Se envía texto limpio, no el HTML completo.
+ * Extract metadata and main text with Mozilla Readability.
+ * Sends cleaned text, not the full HTML.
  */
 function extraerDatosArticulo() {
   const datosBase = {
@@ -78,7 +78,7 @@ function extraerDatosArticulo() {
       }
     }
   } catch (error) {
-    console.warn("[Verificador] Readability falló, usando fallback:", error);
+    console.warn("[Crowy] Readability failed, using fallback:", error);
   }
 
   return extraerDatosFallback(datosBase);
@@ -113,7 +113,7 @@ function extraerDatosFallback(datosBase) {
   };
 }
 
-// Expuesto para popup.js sin depender de chrome.tabs.sendMessage.
+// Exposed for popup.js without depending on chrome.tabs.sendMessage.
 globalThis.__verificadorExtraerDatos = extraerDatosArticulo;
 globalThis.__verificadorExtraerTexto = () => extraerDatosArticulo().content;
 

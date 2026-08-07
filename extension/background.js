@@ -1,15 +1,15 @@
-async function configurarPanelLateral() {
+async function setupSidePanel() {
   try {
     await chrome.sidePanel.setPanelBehavior({
       openPanelOnActionClick: true,
     });
   } catch (error) {
-    console.error("[Verificador] No se pudo configurar el panel lateral:", error);
+    console.error("[Crowy] Could not configure the side panel:", error);
   }
 }
 
-chrome.runtime.onInstalled.addListener(configurarPanelLateral);
-chrome.runtime.onStartup.addListener(configurarPanelLateral);
+chrome.runtime.onInstalled.addListener(setupSidePanel);
+chrome.runtime.onStartup.addListener(setupSidePanel);
 
-// También se ejecuta cuando el service worker se inicia o se recarga.
-configurarPanelLateral();
+// Also runs when the service worker starts or reloads.
+setupSidePanel();

@@ -1,42 +1,44 @@
 # Crowy
 
-Extensión de Chrome + backend local (FastAPI) para analizar el contenido de una página: clasifica si es noticia, evalúa confiabilidad/amarillismo y, si parece falsa, muestra keypoints y fuentes clicables.
+Chrome extension + local backend (FastAPI) that analyzes page content: classifies whether it is news, evaluates reliability/sensationalism, and when it looks false, shows key points and clickable sources.
 
-> **Nota sobre el tamaño:** el proyecto en sí pesa muy poco (~0.2 MB). Si ves ~200 MB en tu carpeta, casi seguro es el entorno virtual de Python (`backend/.venv` o `backend/venv`), que **no debe subirse a GitHub**. Se crea en tu máquina al instalar dependencias.
+Built for the **UNESCO Youth Hackathon**.
 
-## Estructura
+> **Note on size:** the project itself is very small (~0.2 MB). If you see ~200 MB in your folder, it is almost certainly the Python virtual environment (`backend/.venv` or `backend/venv`), which **should not be uploaded to GitHub**. It is created on your machine when you install dependencies.
 
-- `extension/` — extensión Chrome (Manifest V3)
-- `backend/` — API local en FastAPI + Perplexity Sonar
+## Structure
 
-## Requisitos
+- `extension/` — Chrome extension (Manifest V3)
+- `backend/` — local FastAPI + Perplexity Sonar API
 
-- [Python 3.10+](https://www.python.org/downloads/) (marca la opción **Add Python to PATH**)
+## Requirements
+
+- [Python 3.10+](https://www.python.org/downloads/) (check **Add Python to PATH**)
 - [Google Chrome](https://www.google.com/chrome/)
-- API key de Perplexity ([API Portal](https://www.perplexity.ai/account/api))
+- A Perplexity API key ([API Portal](https://www.perplexity.ai/account/api))
 
 ---
 
-## Guía rápida: descargar y hacer que funcione
+## Quick start: download and run
 
-### 1) Descargar el proyecto
+### 1) Download the project
 
-**Opción A — ZIP (más simple)**
+**Option A — ZIP (simplest)**
 
-1. Abre el repositorio en GitHub: [ramosbriseyda/Crowy](https://github.com/ramosbriseyda/Crowy)
-2. Pulsa el botón verde **Code** → **Download ZIP**
-3. Extrae el ZIP en una carpeta (por ejemplo `Documents\Crowy`)
+1. Open the GitHub repo: [ramosbriseyda/Crowy](https://github.com/ramosbriseyda/Crowy)
+2. Click the green **Code** button → **Download ZIP**
+3. Extract the ZIP into a folder (for example `Documents\Crowy`)
 
-**Opción B — Git**
+**Option B — Git**
 
 ```powershell
 git clone https://github.com/ramosbriseyda/Crowy.git
 cd Crowy
 ```
 
-### 2) Arrancar el backend
+### 2) Start the backend
 
-Abre PowerShell en la carpeta del proyecto y ejecuta:
+Open PowerShell in the project folder and run:
 
 ```powershell
 cd backend
@@ -46,43 +48,43 @@ pip install -r requirements.txt
 copy .env.example .env
 ```
 
-1. Abre el archivo `backend/.env` con un editor de texto.
-2. Pon tu clave así: `PERPLEXITY_API_KEY=tu_clave_aqui`
-3. Guarda el archivo.
-4. Arranca el servidor:
+1. Open `backend/.env` in a text editor.
+2. Set your key like: `PERPLEXITY_API_KEY=your_key_here`
+3. Save the file.
+4. Start the server:
 
 ```powershell
 python main.py
 ```
 
-Deja esa ventana abierta. El backend queda en `http://127.0.0.1:8000`.
+Leave that window open. The backend runs at `http://127.0.0.1:8000`.
 
-> Si PowerShell bloquea la activación del entorno virtual, ejecuta una vez:
+> If PowerShell blocks virtual environment activation, run once:
 > `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
 
-### 3) Cargar la extensión en Chrome
+### 3) Load the extension in Chrome
 
-1. Abre Chrome y ve a `chrome://extensions`
-2. Activa **Modo de desarrollador** (arriba a la derecha)
-3. Pulsa **Cargar descomprimida**
-4. Selecciona la carpeta `extension` del proyecto
-5. Abre una noticia en el navegador
-6. Pulsa el icono de Crowy (o abre el panel lateral) y luego **Analizar Noticia**
+1. Open Chrome and go to `chrome://extensions`
+2. Enable **Developer mode** (top right)
+3. Click **Load unpacked**
+4. Select the project’s `extension` folder
+5. Open a news article in the browser
+6. Click the Crowy icon (or open the side panel) and then **Analyze news**
 
-### 4) Si algo falla
+### 4) If something fails
 
-| Problema | Qué revisar |
+| Problem | What to check |
 | --- | --- |
-| “No se pudo conectar con el backend” | El servidor debe estar corriendo (`python main.py`) en el puerto 8000 |
-| Error de API / análisis vacío | Revisa que `PERPLEXITY_API_KEY` esté bien en `backend/.env` |
-| `python` no se reconoce | Reinstala Python marcando **Add to PATH**, o usa `py -3` en lugar de `python` |
-| La extensión no aparece | Confirma que cargaste la carpeta `extension`, no la raíz del proyecto |
+| “Could not connect to the backend” | The server must be running (`python main.py`) on port 8000 |
+| API error / empty analysis | Check that `PERPLEXITY_API_KEY` is set correctly in `backend/.env` |
+| `python` is not recognized | Reinstall Python with **Add to PATH**, or use `py -3` instead of `python` |
+| Extension does not appear | Make sure you loaded the `extension` folder, not the project root |
 
 ---
 
-## Notas
+## Notes
 
-- No subas tu `.env` (contiene secretos). Usa `.env.example` como plantilla.
-- No subas `backend/.venv` ni `backend/venv` a GitHub; son dependencias locales.
-- El amarillismo solo se muestra cuando el contenido es una noticia/reportaje.
-- Los keypoints y fuentes aparecen solo cuando el contenido se marca como no confiable/falso.
+- Do not upload your `.env` (it contains secrets). Use `.env.example` as a template.
+- Do not upload `backend/.venv` or `backend/venv` to GitHub; they are local dependencies.
+- Sensationalism is shown only when the content is news/feature reporting.
+- Key points and sources appear when the content is marked unreliable/false.

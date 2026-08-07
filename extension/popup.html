@@ -1,102 +1,508 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Crowy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --purple: #512DA8;
+      --purple-deep: #3F2385;
+      --purple-soft: #EDE7F6;
+      --cyan: #A8DADA;
+      --cyan-soft: #E8F6F6;
+      --mustard: #FBC02D;
+      --blue-grey: #4A5C74;
+      --text: #4A5C74;
+      --muted: #7A8A9C;
+      --bg: #F8F9FA;
+      --surface: #FFFFFF;
+      --line: #D7E8E8;
+      --font-ui: "Outfit", "Trebuchet MS", "Segoe UI", sans-serif;
+      --font-display: "Fredoka", "Trebuchet MS", "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
       min-width: 320px;
       min-height: 100vh;
       overflow-y: auto;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
-      padding: 15px;
-      background-color: #fcfcfc;
-      color: #333;
+      padding: 22px 20px 20px;
+      font-family: var(--font-ui);
+      color: var(--text);
+      background:
+        radial-gradient(ellipse 90% 55% at 50% 18%, rgba(168, 218, 218, 0.45), transparent 70%),
+        radial-gradient(circle at 10% 90%, rgba(81, 45, 168, 0.08) 0 22px, transparent 23px),
+        radial-gradient(circle at 92% 88%, rgba(168, 218, 218, 0.35) 0 14px, transparent 15px),
+        radial-gradient(circle at 74% 96%, rgba(251, 192, 45, 0.12) 0 8px, transparent 9px),
+        linear-gradient(180deg, #FFFFFF 0%, var(--bg) 55%, #EEF7F7 100%);
     }
-    h3 {
-      margin-top: 0;
-      color: #1a1a1a;
-      font-size: 16px;
-      border-bottom: 1px solid #eaeaea;
-      padding-bottom: 8px;
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
     }
-    p.descripcion {
-      font-size: 12px;
-      color: #666;
-      line-height: 1.4;
+
+    .brand {
+      position: relative;
+      margin-bottom: 10px;
+      padding-right: 48px;
+      animation: fade-down 0.45s ease both;
     }
+
+    .brand h1 {
+      margin: 0;
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--blue-grey);
+      line-height: 1;
+    }
+
+    .brand .subtitle {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+
+    .brand-accent {
+      display: block;
+      width: 46px;
+      height: 4px;
+      margin-top: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--purple), var(--cyan));
+    }
+
+    .sparkle-badge {
+      position: absolute;
+      top: 2px;
+      right: 0;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(145deg, #ffffff, var(--cyan-soft));
+      box-shadow: 0 4px 14px rgba(74, 92, 116, 0.12);
+      display: grid;
+      place-items: center;
+      color: var(--mustard);
+      animation: sparkle-pulse 2.8s ease-in-out infinite;
+    }
+
+    .sparkle-badge svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+    }
+
+    #bienvenida {
+      display: block;
+      animation: fade-up 0.5s ease 0.05s both;
+    }
+
+    .hero {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      margin: 4px 0 6px;
+      padding: 8px 0 4px;
+      min-height: 0;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 42%;
+      width: min(280px, 86%);
+      height: min(280px, 70%);
+      transform: translate(-50%, -20%);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168, 218, 218, 0.55) 0%, rgba(168, 218, 218, 0.18) 42%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .speech-bubble {
+      position: relative;
+      z-index: 2;
+      max-width: 250px;
+      margin: 0 auto;
+      padding: 13px 18px;
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      color: var(--blue-grey);
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.35;
+      text-align: center;
+      box-shadow: 0 10px 24px rgba(74, 92, 116, 0.08);
+      animation: bubble-in 0.55s ease 0.12s both, bubble-float 3.4s ease-in-out 0.7s infinite;
+    }
+
+    .speech-bubble::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: -7px;
+      width: 14px;
+      height: 14px;
+      background: var(--surface);
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      border-radius: 2px;
+      transform: translateX(-50%) rotate(45deg);
+    }
+
+    .mascot-wrap {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .crowy-mascot {
+      display: block;
+      width: min(340px, 100%);
+      height: auto;
+      max-height: 360px;
+      object-fit: contain;
+      object-position: center bottom;
+      margin: 0 auto;
+      filter: drop-shadow(0 14px 18px rgba(74, 92, 116, 0.14));
+    }
+
+    .mascot-stage {
+      width: min(180px, 55%);
+      height: 14px;
+      margin-top: -8px;
+      border-radius: 50%;
+      background: radial-gradient(ellipse at center, rgba(74, 92, 116, 0.14), transparent 70%);
+    }
+
+    .descripcion {
+      margin: 10px auto 18px;
+      max-width: 290px;
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .descripcion strong {
+      color: var(--purple);
+      font-weight: 700;
+    }
+
     button#btn-analizar {
       width: 100%;
-      padding: 10px;
-      background-color: #007bff;
-      color: white;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 14px 16px;
+      background: var(--purple);
+      color: #fff;
       border: none;
-      border-radius: 4px;
+      border-radius: 16px;
       cursor: pointer;
-      font-size: 14px;
-      font-weight: bold;
-      transition: background-color 0.2s ease;
+      font-family: var(--font-ui);
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      box-shadow:
+        0 10px 22px rgba(81, 45, 168, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+      transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+      animation: fade-up 0.5s ease 0.15s both;
     }
-    button#btn-analizar:hover { background-color: #0056b3; }
+
+    button#btn-analizar:hover {
+      background: var(--purple-deep);
+      transform: translateY(-1px);
+      box-shadow: 0 14px 26px rgba(81, 45, 168, 0.34);
+    }
+
+    button#btn-analizar:active {
+      transform: translateY(1px);
+      box-shadow: 0 6px 14px rgba(81, 45, 168, 0.24);
+    }
+
+    button#btn-analizar:focus-visible {
+      outline: 3px solid rgba(81, 45, 168, 0.35);
+      outline-offset: 3px;
+    }
+
     button#btn-analizar:disabled {
-      background-color: #cccccc;
+      background: #A89BCF;
+      box-shadow: none;
       cursor: not-allowed;
+      transform: none;
     }
+
+    .btn-icon {
+      width: 26px;
+      height: 26px;
+      border: 1.5px solid rgba(255, 255, 255, 0.85);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .btn-icon svg {
+      width: 14px;
+      height: 14px;
+      display: block;
+    }
+
+    .privacy {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 11.5px;
+      font-weight: 500;
+      opacity: 0.92;
+    }
+
+    .privacy svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+      opacity: 0.85;
+    }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fade-down {
+      from { opacity: 0; transform: translateY(-8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bubble-in {
+      from { opacity: 0; transform: translateY(8px) scale(0.96); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes bubble-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+    }
+
+    @keyframes sparkle-pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 4px 14px rgba(74, 92, 116, 0.12); }
+      50% { transform: scale(1.05); box-shadow: 0 6px 18px rgba(251, 192, 45, 0.28); }
+    }
+
     #loading {
       display: none;
       text-align: center;
-      margin-top: 15px;
+      margin: 18px auto 8px;
+      width: 100%;
       font-size: 13px;
-      color: #555;
+      color: var(--muted);
     }
+
+    .loading-scene {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      margin: 0 auto 12px;
+    }
+
+    .loading-crowy {
+      width: min(420px, 100%);
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      object-fit: contain;
+      animation: crowy-inspect 1.8s ease-in-out infinite;
+    }
+
+    @keyframes crowy-inspect {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .loading-dots {
+      display: flex;
+      gap: 8px;
+      align-items: flex-end;
+      height: 18px;
+      margin: 2px 0 8px;
+    }
+
+    .loading-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--purple);
+      display: block;
+      animation: bounce-dot 0.9s ease-in-out infinite;
+    }
+
+    .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+    @keyframes bounce-dot {
+      0%, 100% { transform: translateY(0); opacity: 0.55; }
+      50% { transform: translateY(-8px); opacity: 1; }
+    }
+
+    #loading-text {
+      margin: 0 auto;
+      max-width: 280px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--blue-grey);
+      line-height: 1.4;
+    }
+
+    #error {
+      display: none;
+      margin-top: 12px;
+      padding: 10px 12px;
+      background: #FFF8E1;
+      color: #8D6E00;
+      border: 1px solid rgba(251, 192, 45, 0.45);
+      border-radius: 10px;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
     #resultado {
       margin-top: 15px;
       padding: 12px;
-      border-radius: 6px;
-      background-color: #ffffff;
-      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      background-color: var(--surface);
+      border: 1px solid var(--line);
       display: none;
       font-size: 13px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      box-shadow: 0 2px 8px rgba(74, 92, 116, 0.08);
     }
+
     .info-item { margin-bottom: 10px; }
     .info-item:last-child { margin-bottom: 0; }
-    .label { font-weight: bold; color: #555; }
-    .valor { font-weight: 600; }
+    .label { font-weight: bold; color: var(--blue-grey); }
+    .valor { font-weight: 600; color: var(--blue-grey); }
+
+    .reliability-scale {
+      display: flex;
+      width: 100%;
+      height: 18px;
+      margin-top: 8px;
+      gap: 0;
+      overflow: hidden;
+      border-radius: 9px;
+    }
+
+    .reliability-seg {
+      flex: 1 1 0;
+      min-width: 0;
+      height: 100%;
+      opacity: 0.22;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+    }
+
+    .reliability-seg.active {
+      opacity: 1;
+    }
+
+    .reliability-seg.current {
+      opacity: 1;
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.85);
+      transform: scaleY(1.12);
+      z-index: 1;
+    }
+
+    .reliability-seg.first {
+      border-radius: 9px 0 0 9px;
+    }
+
+    .reliability-seg.last {
+      border-radius: 0 9px 9px 0;
+    }
+
+    .reliability-meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+
+    .reliability-score {
+      margin-top: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--blue-grey);
+    }
+
     #res-resumen,
     #res-justificacion-amarillismo {
       margin: 6px 0 0 0;
-      color: #444;
+      color: var(--text);
       font-size: 12px;
       line-height: 1.45;
     }
+
     .section-title {
       font-weight: bold;
-      color: #555;
+      color: var(--blue-grey);
       margin: 12px 0 6px;
       font-size: 12px;
     }
+
     #res-keypoints {
       list-style: none;
       margin: 0;
       padding: 0;
     }
+
     #res-keypoints li {
       margin-bottom: 8px;
       padding: 8px;
-      background: #f7f7f7;
-      border-left: 3px solid #9e9e9e;
-      border-radius: 0 4px 4px 0;
+      background: var(--cyan-soft);
+      border-left: 3px solid var(--muted);
+      border-radius: 0 8px 8px 0;
       font-size: 12px;
       line-height: 1.4;
     }
+
     #res-keypoints li.falso { border-left-color: #c62828; }
     #res-keypoints li.enganoso { border-left-color: #ef6c00; }
-    #res-keypoints li.parcialmente_cierto { border-left-color: #f9a825; }
+    #res-keypoints li.parcialmente_cierto { border-left-color: var(--mustard); }
     #res-keypoints li.verdadero { border-left-color: #2e7d32; }
-    #res-keypoints li.sin_verificar { border-left-color: #757575; }
+    #res-keypoints li.sin_verificar { border-left-color: var(--muted); }
+
     .kp-veredicto {
       display: inline-block;
       font-size: 10px;
@@ -105,84 +511,153 @@
       margin-bottom: 4px;
       letter-spacing: 0.02em;
     }
-    .kp-afirmacion { font-weight: 600; color: #222; margin-bottom: 3px; }
-    .kp-explicacion { color: #555; }
+
+    .kp-afirmacion { font-weight: 600; color: var(--blue-grey); margin-bottom: 3px; }
+    .kp-explicacion { color: var(--text); }
+
     #res-fuentes {
       list-style: none;
       margin: 0;
       padding: 0;
     }
+
     #res-fuentes li {
       margin-bottom: 8px;
       padding: 8px;
-      background: #f0f7ff;
-      border-radius: 4px;
+      background: var(--cyan-soft);
+      border: 1px solid var(--line);
+      border-radius: 8px;
       font-size: 12px;
       line-height: 1.4;
     }
+
     #res-fuentes a {
-      color: #0d47a1;
+      color: var(--purple);
       font-weight: 600;
       text-decoration: underline;
       cursor: pointer;
       word-break: break-word;
     }
-    #res-fuentes a:hover { color: #1565c0; }
+
+    #res-fuentes a:hover { color: var(--purple-deep); }
+
     .fuente-fragmento {
       margin-top: 4px;
-      color: #555;
+      color: var(--text);
       font-size: 11px;
     }
+
     .fuente-dominio {
-      color: #888;
+      color: var(--muted);
       font-size: 10px;
       margin-top: 2px;
     }
+
     .vacio {
-      color: #888;
+      color: var(--muted);
       font-size: 12px;
       font-style: italic;
     }
   </style>
 </head>
 <body>
-  <h3>Crowy</h3>
-  <p class="descripcion">Presiona el botón para analizar el contenido principal de la página actual.</p>
+  <header class="brand">
+    <h1>Crowy</h1>
+    <p class="subtitle">Your news assistant</p>
+    <span class="brand-accent" aria-hidden="true"></span>
+    <div class="sparkle-badge" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2.5l1.2 4.2L17.5 8l-4.3 1.3L12 13.5l-1.2-4.2L6.5 8l4.3-1.3L12 2.5z"/>
+        <path d="M18.5 13l.7 2.3 2.3.7-2.3.7-.7 2.3-.7-2.3-2.3-.7 2.3-.7.7-2.3z"/>
+        <path d="M6.2 14.2l.55 1.8 1.8.55-1.8.55-.55 1.8-.55-1.8-1.8-.55 1.8-.55.55-1.8z"/>
+      </svg>
+    </div>
+  </header>
 
-  <button id="btn-analizar">Analizar Noticia</button>
+  <div id="bienvenida">
+    <div class="hero">
+      <div class="speech-bubble">Ready to analyze this news story?</div>
+      <div class="mascot-wrap">
+        <img class="crowy-mascot" src="assets/crowy.svg" alt="Crowy" width="340" height="400">
+        <div class="mascot-stage" aria-hidden="true"></div>
+      </div>
+    </div>
 
-  <div id="loading">Extrayendo texto y consultando al servidor...</div>
+    <p class="descripcion">
+      Crowy reads the page and gives you a
+      <strong>clear analysis</strong>, powered by
+      <strong>Perplexity</strong>.
+    </p>
+  </div>
 
-  <div id="error" style="display:none; margin-top:12px; padding:10px; background:#fdecea; color:#b71c1c; border-radius:4px; font-size:12px; line-height:1.4;"></div>
+  <button id="btn-analizar">
+    <span class="btn-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="11" cy="11" r="6.5"></circle>
+        <path d="M16.2 16.2L20 20"></path>
+      </svg>
+    </span>
+    Analyze news
+  </button>
+
+  <div id="loading" aria-live="polite">
+    <div class="loading-scene" aria-hidden="true">
+      <img class="loading-crowy" src="assets/crowy-loading.png" alt="" width="420" height="420">
+      <div class="loading-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+    <p id="loading-text">Extracting text and contacting the server...</p>
+  </div>
+
+  <div id="error"></div>
 
   <div id="resultado">
     <div class="info-item">
-      <span class="label">Tipo de contenido:</span>
+      <span class="label">Content type:</span>
       <span id="res-tipo" class="valor">-</span>
     </div>
-    <div class="info-item">
-      <span class="label" id="label-verdadera">¿Es confiable?:</span>
-      <span id="res-verdadera" class="valor">-</span>
+    <div class="info-item" id="fila-confiabilidad">
+      <span class="label" id="label-verdadera">Reliability:</span>
+      <div
+        class="reliability-scale"
+        id="res-verdadera"
+        role="img"
+        aria-label="Reliability scale"
+      ></div>
+      <div class="reliability-meta">
+        <span>False</span>
+        <span>True</span>
+      </div>
+      <div class="reliability-score" id="res-confiabilidad-score"></div>
     </div>
     <div class="info-item" id="fila-amarillismo">
-      <span class="label">Nivel de Amarillismo:</span>
+      <span class="label">Sensationalism level:</span>
       <span id="res-amarillismo" class="valor">-</span>
       <p id="res-justificacion-amarillismo">-</p>
     </div>
     <div class="info-item">
-      <span class="label" id="label-informe">Informe / Correcciones:</span>
+      <span class="label" id="label-informe">Report / corrections:</span>
       <p id="res-resumen">-</p>
     </div>
 
     <div id="bloque-falso" style="display:none;">
-      <div class="section-title">Puntos clave (partes falsas / engañosas)</div>
+      <div class="section-title">Key points (false / misleading parts)</div>
       <ul id="res-keypoints"></ul>
     </div>
 
     <div id="bloque-fuentes">
-      <div class="section-title" id="titulo-fuentes">Fuentes consultadas</div>
+      <div class="section-title" id="titulo-fuentes">Sources consulted</div>
       <ul id="res-fuentes"></ul>
     </div>
+  </div>
+
+  <div id="privacy" class="privacy">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+      <path d="M12 3l7 3v5c0 4.5-2.8 7.6-7 10-4.2-2.4-7-5.5-7-10V6l7-3z"></path>
+      <path d="M9.2 12.1l1.8 1.8 3.8-3.8"></path>
+    </svg>
+    <span>Your privacy matters.</span>
   </div>
 
   <script src="popup.js"></script>
