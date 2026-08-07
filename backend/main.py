@@ -82,6 +82,21 @@ class Fuente(BaseModel):
     )
 
 
+class RazonEducativa(BaseModel):
+    etiqueta: str = Field(
+        description=(
+            "Short MIL teaching label in English, e.g. "
+            "'Sensationalist language', 'No official sources', 'Misleading headline'."
+        )
+    )
+    explicacion: str = Field(
+        description=(
+            "One short sentence in English explaining what to watch for "
+            "and why it matters for media literacy."
+        )
+    )
+
+
 class NewsAnalysis(BaseModel):
     tipo_contenido: Literal["noticia", "reportaje", "opinion", "no_noticia"] = Field(
         description=(
@@ -134,6 +149,14 @@ class NewsAnalysis(BaseModel):
             "All text in English. If es_verdadera=true: empty list []."
         ),
     )
+    razones_educativas: list[RazonEducativa] = Field(
+        default_factory=list,
+        description=(
+            "ONLY if es_verdadera=false: 2 to 4 educational 'why it looks fake/unreliable' "
+            "reasons for media literacy. Short labels + 1-sentence explanations in English. "
+            "If es_verdadera=true: empty list []."
+        ),
+    )
     fuentes: list[Fuente] = Field(
         default_factory=list,
         description=(
@@ -158,7 +181,8 @@ appear inside its headline, body, or links.
 LANGUAGE RULE (MANDATORY):
 - Write EVERY human-readable string value in English only.
 - This includes: resumen, justificacion_amarillismo, informe_correcciones,
-  keypoints.afirmacion, keypoints.explicacion, fuentes.titulo, fuentes.fragmento.
+  keypoints.afirmacion, keypoints.explicacion, fuentes.titulo, fuentes.fragmento,
+  razones_educativas.etiqueta, razones_educativas.explicacion.
 - JSON keys may stay as in the schema (Spanish names are legacy keys only).
 - Do NOT write Spanish, even if the article is in Spanish or the user seems Spanish-speaking.
 - If you quote Spanish text, immediately paraphrase the meaning in English.
@@ -198,6 +222,9 @@ Logical response shape:
   "justificacion_amarillismo": "brief explanation" | null,
   "resumen": "short text",
   "keypoints": [],
+  "razones_educativas": [
+    {"etiqueta": "short label", "explicacion": "one sentence"}
+  ],
   "fuentes": [],
   "informe_correcciones": "short text"
 }
@@ -217,11 +244,17 @@ Text limits (REQUIRED):
 
 If es_verdadera=true:
 - keypoints = []
+- razones_educativas = []
 - fuentes: 3 to 6 real, reliable URLs that support the claims (do not invent).
 - informe_correcciones: 1-2 sentences explaining why it is reliable.
 
 If es_verdadera=false:
 - keypoints: 3 to 6 items (false/misleading parts), 1-sentence explanation each.
+- razones_educativas: 2 to 4 media-literacy reasons teaching WHY it looks fake/unreliable.
+  Prefer concrete labels such as: "Sensationalist language", "No official sources",
+  "Misleading headline", "Missing context", "Unverified claims", "Emotional manipulation",
+  "Anonymous or unknown outlet".
+  Each explicacion must teach the reader what signal to notice (1 short sentence).
 - fuentes: real URLs that refute (do not invent).
 - resumen/informe: 1-2 sentences.
 
@@ -402,13 +435,41 @@ def apply_rules(result: NewsAnalysis) -> NewsAnalysis:
     result.informe_correcciones = compact_text(result.informe_correcciones)
     result.resumen = compact_text(result.resumen, max_chars=220)
 
-    # Correction points only apply to false/unreliable content.
+    # Correction points and educational reasons only for unreliable content.
     if result.es_verdadera:
         result.keypoints = []
+        result.razones_educativas = []
     else:
         for kp in result.keypoints or []:
             kp.afirmacion = compact_text(kp.afirmacion, max_chars=160)
             kp.explicacion = compact_text(kp.explicacion, max_chars=180)
+
+        cleaned_reasons: list[RazonEducativa] = []
+        for reason in result.razones_educativas or []:
+            label = compact_text(reason.etiqueta, max_chars=48)
+            explanation = compact_text(reason.explicacion, max_chars=140)
+            if label and explanation:
+                cleaned_reasons.append(
+                    RazonEducativa(etiqueta=label, explicacion=explanation)
+                )
+        if not cleaned_reasons:
+            cleaned_reasons = [
+                RazonEducativa(
+                    etiqueta="Needs verification",
+                    explicacion=(
+                        "The claims are not solidly backed by clear, "
+                        "citable evidence yet."
+                    ),
+                ),
+                RazonEducativa(
+                    etiqueta="Check the sources",
+                    explicacion=(
+                        "Look for official documents or recognized outlets "
+                        "before trusting the story."
+                    ),
+                ),
+            ]
+        result.razones_educativas = cleaned_reasons[:4]
 
     # Clean both supporting and refuting sources.
     cleaned: list[Fuente] = []
@@ -502,6 +563,7 @@ async def verify_news(request: AnalisisRequest):
         result.fuentes = merge_sources(result.fuentes, search_sources)
         if result.es_verdadera:
             result.keypoints = []
+            result.razones_educativas = []
 
         print(
             f"[Crowy] tipo={result.tipo_contenido}, "

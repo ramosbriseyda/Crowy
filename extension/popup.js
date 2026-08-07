@@ -104,9 +104,19 @@ const resJustificacionAmarillismo = document.getElementById(
 const resResumen = document.getElementById("res-resumen");
 const labelInforme = document.getElementById("label-informe");
 const bloqueFalso = document.getElementById("bloque-falso");
+const bloqueWhy = document.getElementById("bloque-why");
+const whyTitle = document.getElementById("why-title");
+const resWhyReasons = document.getElementById("res-why-reasons");
+const whyCrowImg = document.getElementById("why-crow-img");
 const resKeypoints = document.getElementById("res-keypoints");
 const tituloFuentes = document.getElementById("titulo-fuentes");
 const resFuentes = document.getElementById("res-fuentes");
+
+if (whyCrowImg) {
+  whyCrowImg.addEventListener("error", () => {
+    whyCrowImg.src = "assets/crowy-why.png";
+  });
+}
 
 const BACKEND_URL = "https://crowy.onrender.com/verificar";
 let idAnalisisActivo = 0;
@@ -211,6 +221,51 @@ function renderKeypoints(keypoints) {
   }
 }
 
+const FALLBACK_WHY_REASONS = [
+  {
+    etiqueta: "Needs verification",
+    explicacion:
+      "The claims are not solidly backed by clear, citable evidence yet.",
+  },
+  {
+    etiqueta: "Check the sources",
+    explicacion:
+      "Look for official documents or recognized outlets before trusting the story.",
+  },
+  {
+    etiqueta: "Watch the tone",
+    explicacion:
+      "Emotional or sensational language can push you to share before checking facts.",
+  },
+];
+
+function renderWhyReasons(reasons, reliabilityScore) {
+  if (!bloqueWhy || !resWhyReasons) return;
+
+  let list = Array.isArray(reasons)
+    ? reasons.filter((r) => r?.etiqueta && r?.explicacion)
+    : [];
+  if (!list.length) {
+    list = FALLBACK_WHY_REASONS;
+  }
+
+  if (whyTitle) {
+    whyTitle.textContent =
+      reliabilityScore <= 3 ? "Why it's fake" : "Why this looks unreliable";
+  }
+
+  resWhyReasons.innerHTML = "";
+  for (const reason of list.slice(0, 4)) {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span class="why-tag">${escapeHtml(reason.etiqueta)}</span>
+      <p class="why-text">${escapeHtml(reason.explicacion)}</p>
+    `;
+    resWhyReasons.appendChild(li);
+  }
+  bloqueWhy.style.display = "block";
+}
+
 function renderSources(sources) {
   resFuentes.innerHTML = "";
   if (!sources || !sources.length) {
@@ -306,31 +361,58 @@ btn.addEventListener("click", async () => {
 
     setLoadingMessage("Cleaning the main content...");
     startStatusRotation(2);
-    const backendResponse = await fetch(BACKEND_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        url: articleData?.url || tab.url || "",
-        domain: articleData?.domain || domainFromUrl(tab.url || ""),
-        title: articleData?.title || tab.title || "",
-        content,
-        texto: content,
-        links: articleData?.links || [],
-      }),
-    });
-    if (analysisId !== idAnalisisActivo) return;
+
+    const payload = {
+      url: articleData?.url || tab.url || "",
+      domain: articleData?.domain || domainFromUrl(tab.url || ""),
+      title: articleData?.title || tab.title || "",
+      content,
+      texto: content,
+      links: articleData?.links || [],
+    };
+
+    let backendResponse = null;
+    const maxAttempts = 3;
+    for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+      if (attempt > 1) {
+        setLoadingMessage("Waking up the server, retrying...");
+        await new Promise((resolve) => setTimeout(resolve, 2500));
+      }
+      backendResponse = await fetch(BACKEND_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (analysisId !== idAnalisisActivo) return;
+
+      const transient =
+        backendResponse.status === 520 ||
+        backendResponse.status === 502 ||
+        backendResponse.status === 503 ||
+        backendResponse.status === 504;
+      if (backendResponse.ok || !transient || attempt === maxAttempts) {
+        break;
+      }
+    }
+
     stopStatusRotation();
     setLoadingMessage("Building your report...");
 
     if (!backendResponse.ok) {
       let detail = `Server error (${backendResponse.status})`;
-      try {
-        const err = await backendResponse.json();
-        if (err.detail) {
-          detail = typeof err.detail === "string" ? err.detail : JSON.stringify(err.detail);
+      if ([502, 503, 504, 520].includes(backendResponse.status)) {
+        detail =
+          "The Render server is waking up or temporarily unavailable. Wait ~30s and try again.";
+      } else {
+        try {
+          const err = await backendResponse.json();
+          if (err.detail) {
+            detail =
+              typeof err.detail === "string" ? err.detail : JSON.stringify(err.detail);
+          }
+        } catch (_) {
+          /* ignore */
         }
-      } catch (_) {
-        /* ignore */
       }
       throw new Error(detail);
     }
@@ -380,15 +462,18 @@ btn.addEventListener("click", async () => {
 
     renderSources(data.fuentes);
 
-    // Key points are shown only when the content is marked unreliable/false.
+    // Educational "why" + key points only when content is unreliable/false.
     if (!data.es_verdadera) {
       labelInforme.textContent = "Summary:";
       bloqueFalso.style.display = "block";
       tituloFuentes.textContent = "Sources that refute or correct";
+      renderWhyReasons(data.razones_educativas, reliabilityScore);
       renderKeypoints(data.keypoints);
     } else {
       labelInforme.textContent = "Report / corrections:";
       bloqueFalso.style.display = "none";
+      if (bloqueWhy) bloqueWhy.style.display = "none";
+      if (resWhyReasons) resWhyReasons.innerHTML = "";
       tituloFuentes.textContent = "Sources that support the story";
       resKeypoints.innerHTML = "";
     }

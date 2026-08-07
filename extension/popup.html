@@ -558,6 +558,86 @@
       font-size: 12px;
       font-style: italic;
     }
+
+    #bloque-why {
+      display: none;
+      margin: 14px 0 4px;
+      padding: 12px;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #FFF8E1 0%, #FFFFFF 100%);
+      border: 1px solid rgba(251, 192, 45, 0.45);
+    }
+
+    .why-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .why-crow {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      object-position: center;
+      flex-shrink: 0;
+      filter: drop-shadow(0 4px 8px rgba(74, 92, 116, 0.12));
+    }
+
+    .why-title-wrap {
+      min-width: 0;
+    }
+
+    .why-title {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--blue-grey);
+      line-height: 1.2;
+    }
+
+    .why-subtitle {
+      margin: 3px 0 0;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 500;
+      line-height: 1.35;
+    }
+
+    #res-why-reasons {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #res-why-reasons li {
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid var(--line);
+    }
+
+    .why-tag {
+      display: inline-block;
+      margin-bottom: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(81, 45, 168, 0.1);
+      color: var(--purple);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .why-text {
+      margin: 0;
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
@@ -639,6 +719,24 @@
     <div class="info-item">
       <span class="label" id="label-informe">Report / corrections:</span>
       <p id="res-resumen">-</p>
+    </div>
+
+    <div id="bloque-why">
+      <div class="why-header">
+        <img
+          class="why-crow"
+          id="why-crow-img"
+          src="assets/crowy-why.png"
+          alt="Crowy explaining"
+          width="72"
+          height="72"
+        >
+        <div class="why-title-wrap">
+          <h3 class="why-title" id="why-title">Why it's fake</h3>
+          <p class="why-subtitle">Crowy teaches you the warning signs to watch for.</p>
+        </div>
+      </div>
+      <ul id="res-why-reasons"></ul>
     </div>
 
     <div id="bloque-falso" style="display:none;">
