@@ -108,6 +108,8 @@ const resKeypoints = document.getElementById("res-keypoints");
 const tituloFuentes = document.getElementById("titulo-fuentes");
 const resFuentes = document.getElementById("res-fuentes");
 
+// After deploying on Render, replace with:
+// "https://YOUR-SERVICE.onrender.com/verificar"
 const BACKEND_URL = "http://127.0.0.1:8001/verificar";
 let idAnalisisActivo = 0;
 

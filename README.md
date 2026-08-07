@@ -82,6 +82,31 @@ Leave that window open. The backend runs at `http://127.0.0.1:8000`.
 
 ---
 
+## Deploy the backend on Render (public demo)
+
+1. Push this repo to GitHub (already: `ramosbriseyda/Crowy`).
+2. In [Render](https://dashboard.render.com) → **New** → **Web Service**.
+3. Connect the Crowy GitHub repo.
+4. Use these settings:
+   - **Root Directory:** `backend`
+   - **Runtime:** Python
+   - **Build Command:** `pip install -r requirements.txt`
+   - **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
+5. In **Environment**, add:
+   - `PERPLEXITY_API_KEY` = your Perplexity key
+6. Deploy. When it finishes, open the service URL (e.g. `https://crowy-api.onrender.com`). You should see a JSON status message.
+7. In `extension/popup.js`, set:
+
+```js
+const BACKEND_URL = "https://YOUR-SERVICE.onrender.com/verificar";
+```
+
+8. Reload the extension in `chrome://extensions`.
+
+> Free Render services sleep after inactivity; the first request can take ~30–60s.
+
+---
+
 ## Notes
 
 - Do not upload your `.env` (it contains secrets). Use `.env.example` as a template.
