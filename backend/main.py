@@ -192,9 +192,22 @@ Evaluation rules:
 - Consider the domain and editorial reputation separately from each claim.
 - If it comes from a widely recognized outlet (BBC, Reuters, EFE, AP, The Guardian,
   or equivalent), treat it as reliable unless you find explicit, verifiable evidence
-  of falsehood, manipulation, or serious lack of context.
+  of falsehood, manipulation, serious lack of context, OR satire/parody.
 - A controversial word alone does not make a story false. Check the claim and whether
   it is attributed to a report, document, institution, or public figure.
+
+1b. SATIRE / PARODY (MANDATORY):
+- If the article is satire, parody, humor, spoof news, or from a known satire outlet
+  (The Onion, Babylon Bee, El Mundo Today, ClickHole, The Beaverton, etc.),
+  it is NOT reliable factual news.
+- In that case you MUST set:
+  es_verdadera = false
+  nivel_confiabilidad = 1 to 3
+  tipo_contenido = "no_noticia" (preferred) or keep journalistic type only if it
+  clearly mimics a news format, but still es_verdadera=false.
+- Explain clearly that it is satire/parody and should not be read as real news.
+- Include at least one razones_educativas item labeled "Satire or parody".
+- Do NOT mark satire as true just because the joke is intentional or the site is famous.
 
 2. SENSATIONALISM ASSESSMENT:
 - If the headline or text uses strong language only to accurately quote or describe
@@ -251,11 +264,11 @@ If es_verdadera=true:
 If es_verdadera=false:
 - keypoints: 3 to 6 items (false/misleading parts), 1-sentence explanation each.
 - razones_educativas: 2 to 4 media-literacy reasons teaching WHY it looks fake/unreliable.
-  Prefer concrete labels such as: "Sensationalist language", "No official sources",
-  "Misleading headline", "Missing context", "Unverified claims", "Emotional manipulation",
-  "Anonymous or unknown outlet".
+  Prefer concrete labels such as: "Satire or parody", "Sensationalist language",
+  "No official sources", "Misleading headline", "Missing context", "Unverified claims",
+  "Emotional manipulation", "Anonymous or unknown outlet".
   Each explicacion must teach the reader what signal to notice (1 short sentence).
-- fuentes: real URLs that refute (do not invent).
+- fuentes: real URLs that refute or identify the satire source (do not invent).
 - resumen/informe: 1-2 sentences.
 
 If news, feature, or opinion:
@@ -298,6 +311,40 @@ TRUSTED_OUTLETS = {
     "theguardian.com",
 }
 
+SATIRE_OUTLETS = {
+    "theonion.com",
+    "babylonbee.com",
+    "clickhole.com",
+    "thebeaverton.com",
+    "elmundotoday.com",
+    "haynoticia.es",
+    "thehardtimes.net",
+    "waterfordwhispersnews.com",
+    "duffelblog.com",
+    "satirewire.com",
+    "thespoof.com",
+    "newsbiscuit.com",
+    "reducciondejornales.com",
+}
+
+SATIRE_KEYWORDS = (
+    "satire",
+    "satirical",
+    "parody",
+    "parodic",
+    "humor site",
+    "humour site",
+    "not a real news",
+    "not real news",
+    "fake news for entertainment",
+    "for entertainment purposes",
+    "the onion",
+    "babylon bee",
+    "el mundo today",
+    "clickhole",
+    "the beaverton",
+)
+
 
 def _clean_domain(domain: str, url: str = "") -> str:
     domain = (domain or _domain(url)).strip().lower().split(":")[0]
@@ -309,6 +356,104 @@ def _is_trusted_outlet(domain: str) -> bool:
         domain == outlet or domain.endswith(f".{outlet}")
         for outlet in TRUSTED_OUTLETS
     )
+
+
+def _is_satire_outlet(domain: str) -> bool:
+    return any(
+        domain == outlet or domain.endswith(f".{outlet}")
+        for outlet in SATIRE_OUTLETS
+    )
+
+
+def _text_signals_satire(*parts: str) -> bool:
+    blob = " ".join(part or "" for part in parts).lower()
+    return any(keyword in blob for keyword in SATIRE_KEYWORDS)
+
+
+def mark_satire_as_unreliable(
+    result: NewsAnalysis,
+    domain: str = "",
+    title: str = "",
+    content: str = "",
+) -> NewsAnalysis:
+    """Force satire/parody to count as unreliable for media-literacy purposes."""
+    is_satire = _is_satire_outlet(domain) or _text_signals_satire(
+        title,
+        content[:4000],
+        result.resumen,
+        result.informe_correcciones,
+        result.justificacion_amarillismo or "",
+        " ".join(
+            f"{r.etiqueta} {r.explicacion}" for r in (result.razones_educativas or [])
+        ),
+        " ".join(
+            f"{kp.afirmacion} {kp.explicacion}" for kp in (result.keypoints or [])
+        ),
+    )
+    if not is_satire:
+        return result
+
+    result.es_verdadera = False
+    if result.nivel_confiabilidad >= 5:
+        result.nivel_confiabilidad = 2
+    if result.tipo_contenido == "noticia":
+        # Satire mimicking news is still not factual reporting.
+        result.tipo_contenido = "no_noticia"
+        result.nivel_amarillismo = None
+        result.justificacion_amarillismo = None
+
+    if not result.resumen or "satire" not in result.resumen.lower():
+        result.resumen = compact_text(
+            "This appears to be satire or parody, not factual news. "
+            "Treat the claims as entertainment, not verified information.",
+            max_chars=220,
+        )
+    if (
+        not result.informe_correcciones
+        or "satire" not in result.informe_correcciones.lower()
+    ):
+        result.informe_correcciones = compact_text(
+            "Satirical or parody content should not be shared as real news. "
+            "Check whether the outlet is known for humor before trusting it.",
+            max_chars=320,
+        )
+
+    has_satire_reason = any(
+        "satire" in (r.etiqueta or "").lower() or "parody" in (r.etiqueta or "").lower()
+        for r in (result.razones_educativas or [])
+    )
+    if not has_satire_reason:
+        result.razones_educativas = [
+            RazonEducativa(
+                etiqueta="Satire or parody",
+                explicacion=(
+                    "This content is meant as a joke or spoof, not as a factual report."
+                ),
+            ),
+            RazonEducativa(
+                etiqueta="Not real news",
+                explicacion=(
+                    "Even if it looks like a news article, satirical sites invent "
+                    "stories for humor."
+                ),
+            ),
+            *(result.razones_educativas or []),
+        ][:4]
+
+    if not result.keypoints:
+        result.keypoints = [
+            KeyPoint(
+                afirmacion="The story is presented in a news-like format.",
+                veredicto="enganoso",
+                explicacion="Satire often imitates real news design to make the joke land.",
+            ),
+            KeyPoint(
+                afirmacion="The claims are not meant as verified facts.",
+                veredicto="falso",
+                explicacion="Treat parody headlines as fiction unless confirmed elsewhere.",
+            ),
+        ]
+    return result
 
 
 def extract_search_sources(response) -> list[Fuente]:
@@ -514,11 +659,15 @@ async def verify_news(request: AnalisisRequest):
         )
 
     domain = _clean_domain(request.domain, request.url)
-    reputation = (
-        "Recognized outlet included in the reference editorial list."
-        if _is_trusted_outlet(domain)
-        else "Domain without prior classification; evaluate using evidence."
-    )
+    if _is_satire_outlet(domain):
+        reputation = (
+            "Known satire/parody outlet. Must be treated as non-factual "
+            "(es_verdadera=false)."
+        )
+    elif _is_trusted_outlet(domain):
+        reputation = "Recognized outlet included in the reference editorial list."
+    else:
+        reputation = "Domain without prior classification; evaluate using evidence."
     links = "\n".join(
         f"- {(link.texto or 'Cited link').strip()}: {link.url}"
         for link in request.links
@@ -536,7 +685,9 @@ async def verify_news(request: AnalisisRequest):
         "Cross-check facts on the web, distinguish attributed quotes from the outlet's "
         "own voice, and respond only with the requested JSON.\n"
         "CRITICAL: Every string value in the JSON must be in English "
-        "(not Spanish). Schema key names are not the output language."
+        "(not Spanish). Schema key names are not the output language.\n"
+        "CRITICAL: If this is satire/parody/humor news, set es_verdadera=false "
+        "and explain that it is not factual news."
     )
 
     try:
@@ -557,6 +708,12 @@ async def verify_news(request: AnalisisRequest):
         )
         raw = response.choices[0].message.content or ""
         result = NewsAnalysis.model_validate_json(raw)
+        result = mark_satire_as_unreliable(
+            result,
+            domain=domain,
+            title=request.title,
+            content=content,
+        )
         result = apply_rules(result)
 
         search_sources = extract_search_sources(response)
